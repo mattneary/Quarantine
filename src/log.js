@@ -1,3 +1,4 @@
+var fs = require('fs');
 var parse_body = function(body) {
   var pairs = body.split('&'),
       dict = {};

