@@ -18,7 +18,7 @@ module.exports = function(req, file, map) {
   });
   req.on("end", function() {
     var body = parse_body(chunks.join(''));
-    log.write(map(body)+'\n');
+    log.write(map(body));
   });
 };
 

