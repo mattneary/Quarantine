@@ -1,9 +1,9 @@
 var http = require('http'),
     https = require('https'),
     fs = require('fs'),
-    handler = require('./lib.js'),
-    upgrade = require('./upgrade.js'),
-    logger = require('./log.js');
+    handler = require(__dirname + '/lib.js'),
+    upgrade = require(__dirname + '/upgrade.js'),
+    logger = require(__dirname + '/log.js');
 
 var filter = function(req, res, parsed_req, cont) {
   if( parsed_req.host == 'bwhs.brainhoney.com' ) {
@@ -20,8 +20,8 @@ var filter = function(req, res, parsed_req, cont) {
 };
 
 https.createServer({
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
+  key: fs.readFileSync('certs/key.pem'),
+  cert: fs.readFileSync('certs/cert.pem')
 }, handler(https, filter, function(req) {
   req.url = 'https://' + req.headers['host'] + req.url;
   return req;
