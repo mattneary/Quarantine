@@ -7,6 +7,9 @@ var http = require('http'),
     require_login = require(__dirname + '/auth.js');
 
 var shouldBlock = false, activatedUsers = [];
+var wrap = function(l, a, b) {
+  return l.length ? a + l.join(b+a) + b : '';
+};
 var admin_server = function(req, res, parsed_req) {
   require_login(req, res, parsed_req, function() {
     logger(req, './log.txt', function(body, log) {
@@ -18,17 +21,25 @@ var admin_server = function(req, res, parsed_req) {
     switch( parsed_req.path ) {
       case '/proxy_admin/enforce':
         shouldBlock = true; 
-	res.write("Enforcing");
+	res.writeHead(200, {'Content-Type': 'text/html'});
+	res.write("<h2>Enforcing</h2><a href='/proxy_admin'>Home</a>");
 	res.end();
       break;
       case '/proxy_admin/disable':
         shouldBlock = false;
 	activatedUsers = [];
-	res.write("Disabled");
+	res.writeHead(200, {'Content-Type': 'text/html'});
+	res.write("<h2>Disabled</h2><a href='/proxy_admin'>Home</a>");
 	res.end();
       break;
       default:
-        res.write("Admin\n" + activatedUsers.join('\n'));
+	res.writeHead(200, {'Content-Type': 'text/html'});
+        res.write([
+	  "<h2>Admin: " + (shouldBlock ? "Enforcing" : "Disabled") + "</h2>",
+	  "<ul>" + wrap(activatedUsers, '<li>', '</li>') + "</ul>",
+	  "<a href='/proxy_admin/enforce'>Enforce</a> | ",
+	  "<a href='/proxy_admin/disable'>Disable</a>"
+	].join("\n"));
 	res.end();
       break;
     }
