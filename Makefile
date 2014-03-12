@@ -1,5 +1,5 @@
 all: run
 
 run:
-	./setup/run.sh
+	node src/index.js
 
