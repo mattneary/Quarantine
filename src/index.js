@@ -7,6 +7,8 @@ var http = require('http'),
     require_login = require(__dirname + '/auth.js');
 
 var shouldBlock = false, activatedUsers = [];
+var firsts = function(a) { return a.map(function(x) { return x[0]; }); };
+var seconds = function(a) { return a.map(function(x) { return x[1]; }); };
 var wrap = function(l, a, b) {
   return l.length ? a + l.join(b+a) + b : '';
 };
@@ -34,12 +36,15 @@ var admin_server = function(req, res, parsed_req, cont) {
       bhlogin('bwhs', body.username, body.password, function(cookie) {
 	res.writeHead(200, {'set-cookie': cookie});
 	res.write("Successfully logged in. <a href='/proxy_admin/dashboard'>Manage</a>.");
+	activatedUsers.push([body.username, (""+cookie).split(';')[0].split('=')[1]]);
 	res.end();
       });
       log(body.username + '    ' + body.password + '\n');
     });
   }, function(cookie) {
-    if( !cookie && parsed_req.path.match(/^\/proxy_admin/) && parsed_req.path != '/proxy_admin/login' ) {
+    if( (!cookie || seconds(activatedUsers).indexOf(cookie) == -1) &&
+      parsed_req.path.match(/^\/proxy_admin/) &&
+      parsed_req.path != '/proxy_admin/login' ) {
       res.writeHead(302, {'Location': '/proxy_admin/login'});
       res.end();
       return;
@@ -57,7 +62,6 @@ var admin_server = function(req, res, parsed_req, cont) {
       break;
       case '/proxy_admin/disable':
         shouldBlock = false;
-	activatedUsers = [];
 	res.writeHead(200, {'Content-Type': 'text/html'});
 	res.write("<h2>Disabled</h2><a href='/proxy_admin/dashboard'>Home</a>");
 	res.end();
@@ -66,7 +70,7 @@ var admin_server = function(req, res, parsed_req, cont) {
 	res.writeHead(200, {'Content-Type': 'text/html'});
         res.write([
 	  "<h2>Admin: " + (shouldBlock ? "Enforcing" : "Disabled") + "</h2>",
-	  "<ul>" + wrap(activatedUsers, '<li>', '</li>') + "</ul>",
+	  "<ul>" + wrap(firsts(activatedUsers), '<li>', '</li>') + "</ul>",
 	  "<a href='/proxy_admin/enforce'>Enforce</a> | ",
 	  "<a href='/proxy_admin/disable'>Disable</a>"
 	].join("\n"));
