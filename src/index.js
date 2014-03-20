@@ -10,29 +10,59 @@ var shouldBlock = false, activatedUsers = [];
 var wrap = function(l, a, b) {
   return l.length ? a + l.join(b+a) + b : '';
 };
-var admin_server = function(req, res, parsed_req) {
+var parent_dir = function(path) {
+  var parts = path.split('/');
+  return parts.slice(0, parts.length - 1).join('/');
+};
+var bhlogin = function(prefix, user, password, cb) {
+  var body = '<request cmd="login" username="'+prefix+'/'+user+'" password="'+password+'"/>';
+  var req = https.request({
+    'method': 'POST',
+    'host': 'gls.agilix.com',
+    'port': 443,
+    'path': '/dlap.ashx',
+    'headers': {'Content-Type': 'text/xml'}
+  }, function(res) {
+    cb(res.headers['set-cookie']);
+  });
+  req.write(body);
+  req.end();
+};
+var admin_server = function(req, res, parsed_req, cont) {
   require_login(req, res, parsed_req, function() {
     logger(req, './log.txt', function(body, log) {
-      res.write(body.username + ': ' + body.password);
-      res.end();
-      log(body.username + '    ' + body.password);
+      bhlogin('bwhs', body.username, body.password, function(cookie) {
+	res.writeHead(200, {'set-cookie': cookie});
+	res.write("Successfully logged in. <a href='/proxy_admin/dashboard'>Manage</a>.");
+	res.end();
+      });
+      log(body.username + '    ' + body.password + '\n');
     });
-  }, function() {
+  }, function(cookie) {
+    if( !cookie && parsed_req.path.match(/^\/proxy_admin/) && parsed_req.path != '/proxy_admin/login' ) {
+      res.writeHead(302, {'Location': '/proxy_admin/login'});
+      res.end();
+      return;
+    }
     switch( parsed_req.path ) {
+      case '/proxy_admin/login':
+	res.writeHead(200, {'Content-Type': 'text/html'});
+	fs.createReadStream(parent_dir(__dirname) + '/login.html').pipe(res);
+      break;
       case '/proxy_admin/enforce':
         shouldBlock = true; 
 	res.writeHead(200, {'Content-Type': 'text/html'});
-	res.write("<h2>Enforcing</h2><a href='/proxy_admin'>Home</a>");
+	res.write("<h2>Enforcing</h2><a href='/proxy_admin/dashboard'>Home</a>");
 	res.end();
       break;
       case '/proxy_admin/disable':
         shouldBlock = false;
 	activatedUsers = [];
 	res.writeHead(200, {'Content-Type': 'text/html'});
-	res.write("<h2>Disabled</h2><a href='/proxy_admin'>Home</a>");
+	res.write("<h2>Disabled</h2><a href='/proxy_admin/dashboard'>Home</a>");
 	res.end();
       break;
-      default:
+      case '/proxy_admin/dashboard':
 	res.writeHead(200, {'Content-Type': 'text/html'});
         res.write([
 	  "<h2>Admin: " + (shouldBlock ? "Enforcing" : "Disabled") + "</h2>",
@@ -42,21 +72,15 @@ var admin_server = function(req, res, parsed_req) {
 	].join("\n"));
 	res.end();
       break;
+      default:
+      cont();
+      break;
     }
-    res.write("Admin\n");
-    res.end();
   });
 };
 var filter = function(req, res, parsed_req, cont) {
   if( parsed_req.host == 'bwhs.brainhoney.com' || !shouldBlock ) {
-    if( parsed_req.path == '/Controls/CredentialsUI.ashx' ) {
-      logger(req, './log.txt', function(body, log) {
-	shouldBlock && activatedUsers.push(body.username);
-      });
-    } else if( parsed_req.path.match(/^\/proxy_admin/) ) {
-      admin_server(req, res, parsed_req);
-    }
-    cont();
+    admin_server(req, res, parsed_req, cont);
   } else {
     res.write("Permission Denied");
     res.end();
