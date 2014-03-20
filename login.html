@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html >
+<head id="Head1"><title>
+	Welcome to BrainHoney!
+</title><link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/favicon.ico" /><link rel="stylesheet" type="text/css" href="/Scripts/ext-3.0.0-2/resources/css/ext-all.css" /><link rel="stylesheet" type="text/css" href="/Styles_vv1CF29A12DB367C5.css" /><!--[if IE 6]><link rel="stylesheet" type="text/css" href="/IE6Styles.css" /><![endif]--><script type="text/javascript" src="/Scripts/ext-3.0.0-2/ext-comb8.js"></script><script type="text/javascript" src="/Scripts/ext-3.0.0-2/locale/ext-lang-en.js"></script><script type="text/javascript">Ext.BLANK_IMAGE_URL = '/p';Ext.chart.Chart.CHART_URL='/Scripts/ext-3.0.0-2/resources/charts.swf';</script><script type="text/javascript">function convertLocalTimeToUtcDateTime(date){return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds());}</script>
+<script type="text/javascript">
+Ext.onReady(function()
+{
+    var input = document.getElementById("username");
+    if(input) input.focus();
+});
+</script>
+    <style type="text/css">
+        html, body 
+        {
+        	overflow: auto;
+        	overflow-x: hidden;
+    	    overflow-y: auto;
+        }
+    </style>
+
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+<script src="/Scripts/LocalLogin_vv1CF29A12716FE7A.js" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+loginUrl = "/Controls/CredentialsUI.ashx";//]]>
+</script>
+</head>
+<body class="page_color">
+    <div class="welcome_header">
+        <div class="welcome_header_img"></div>
+        <div class="welcome_message"><span>Welcome to BrainHoney!</span></div>
+    </div>
+
+    <div style="width: 100%" class="default_font">
+		<table style="width: 100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td>
+					<div style="text-align:center">
+						<img alt="Welcome" class="welcome_logo" src="/p" />
+					</div>
+				</td>
+			</tr>
+		</table>
+		<table style="width: 100%" cellspacing="0" cellpadding="0">
+			<tr>
+				<td style="width:50%"></td>
+				<td>
+					<div style="width:310px" class="default_border rounded_box shadow color_light">
+						<div class="color_header">
+    						<div style="padding-top:6px; text-align:center;" class="title_font">User Login</div>
+						</div>
+						<div style="padding: 10px"><form id="loginForm" name="loginForm" method="post" onsubmit="return false;" ><div id="loginFormInner" class="default_font"><input type="hidden" id="action" name="action" /><input type="hidden" name="ReturnUrl" value="https://bwhs.brainhoney.com/Frame/Component/Home" /><input type="hidden" name="standardOffset" id="standardOffset" value="0" /><input type="hidden" name="daylightOffset" id="daylightOffset" value="" /><input type="hidden" name="standardStartTime" id="standardStartTime" value="" /><input type="hidden" name="daylightStartTime" id="daylightStartTime" value="" /><label for="username" style="display:block">Username:</label><input id="username" type="text" name="username" value=""/><label for="password" style="display:block">Password:</label><input type="password" name="password" /><div style="vertical-align:top"><input id="localsubmit" type="submit" class="default_font" onclick="Login();" value='Login' style="padding:3px; margin: 5px 0px 5px 0px"/><img src="/Images/loading.gif" alt="Loading ..." style="display:none; margin: 5px 0px 5px 5px;padding:3px;vertical-align:middle;" id="localloading"/><a style="margin: 5px 0px 5px 20px;" href="javascript:ResetPassword();">Forgot Password?</a></div></div></form></div>
+					</div>
+				</td>
+				<td style="width:50%"></td>
+			</tr>
+		</table>
+    </div>
+    <div id="Footer" class="site_footer" style="clear:both">
+        
+
+<div style="text-align:center;" class="default_font">
+    <span title="Version: 2012.3.15885">Copyright &#169; 2007-2013 Agilix Labs, All Rights Reserved</span>
+</div>
+
+    </div>
+</body>
+</html>
