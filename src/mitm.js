@@ -26,6 +26,7 @@ module.exports = function(connector, filter, req_map) {
 	  res.writeHead(fetch.statusCode, fetch.headers);
 	  fetch.pipe(res);
 	});
+      fetcher.on("error", function() {});
       req.pipe(fetcher);
     });
   };
