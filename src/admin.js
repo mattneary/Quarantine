@@ -35,7 +35,7 @@ module.exports = function(req, res, parsed_req, cont) {
     switch( parsed_req.path ) {
       case '/proxy/login':
 	res.writeHead(200, {'Content-Type': 'text/html'});
-	fs.createReadStream(parent_dir(__dirname) + '/login.html').pipe(res);
+	fs.createReadStream(parent_dir(__dirname) + '/views/login.html').pipe(res);
       break;
       case '/proxy/enforce':
         shouldBlock = true; 
@@ -60,7 +60,7 @@ module.exports = function(req, res, parsed_req, cont) {
 	res.end();
       break;
       default:
-      cont();
+	cont();
       break;
     }
   });
